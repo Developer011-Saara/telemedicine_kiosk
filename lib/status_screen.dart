@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StatusScreen extends StatefulWidget {
   const StatusScreen({super.key});
@@ -9,6 +9,30 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
+  final List<Doctor> _doctors = [
+    Doctor(
+      name: 'Dr. Sarah Johnson',
+      specialty: 'Cardiologist',
+      isAvailable: true,
+      status: 'Available Now',
+      responseTime: 'Avg response time: 2-3 minutes',
+    ),
+    Doctor(
+      name: 'Dr. Michael Chen',
+      specialty: 'General Practitioner',
+      isAvailable: false,
+      status: 'In consultation',
+      responseTime: 'Available in ~15 minutes',
+    ),
+    Doctor(
+      name: 'Dr. Emily Rodriguez',
+      specialty: 'Pediatrician',
+      isAvailable: false,
+      status: 'Offline',
+      responseTime: 'Returns tomorrow at 9:00 AM',
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -45,70 +69,46 @@ class _StatusScreenState extends State<StatusScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream:
-                  FirebaseFirestore.instance.collection('doctors').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('No doctors available'),
-                  );
-                }
-
-                final doctors = snapshot.data!.docs;
-                final hasOfflineDoctors = doctors.any((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  return !(data['isOnline'] ?? false);
-                });
-
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: doctors.length,
-                        itemBuilder: (context, index) {
-                          final doc = doctors[index];
-                          final data = doc.data() as Map<String, dynamic>;
-                          final doctor = Doctor.fromFirestore(data);
-                          return _DoctorCard(doctor: doctor);
-                        },
-                      ),
-                    ),
-                    if (hasOfflineDoctors)
-                      Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF6E6),
-                          border: Border.all(color: const Color(0xFFFFB74D)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'Some doctors are currently offline. Don\'t worry! They\'ll be back online shortly.',
-                          style: TextStyle(
-                            color: Color(0xFF805A00),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
+            child: _buildMockDoctorsList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMockDoctorsList() {
+    final hasOfflineDoctors = _doctors.any((d) => !d.isAvailable);
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _doctors.length,
+            itemBuilder: (context, index) {
+              final doctor = _doctors[index];
+              return _DoctorCard(doctor: doctor);
+            },
+          ),
+        ),
+        if (hasOfflineDoctors)
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF6E6),
+              border: Border.all(color: const Color(0xFFFFB74D)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'Some doctors are currently offline. Don\'t worry! They\'ll be back online shortly.',
+              style: TextStyle(
+                color: Color(0xFF805A00),
+                fontSize: 14,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
