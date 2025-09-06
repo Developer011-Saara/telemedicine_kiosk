@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'services/mock_backend.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,7 +9,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool doctorOnline = MockBackendService.instance.currentOnline;
+  bool doctorOnline = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,53 +22,69 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 28,
-                  child: Icon(Icons.person, size: 28),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            StreamBuilder<QuerySnapshot>(
+              stream:
+                  FirebaseFirestore.instance.collection('doctors').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                  // Check if any doctor is online
+                  final hasOnlineDoctor = snapshot.data!.docs.any((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return data['isOnline'] == true;
+                  });
+                  doctorOnline = hasOnlineDoctor;
+                }
+
+                return Row(
                   children: [
-                    Row(
+                    const CircleAvatar(
+                      radius: 28,
+                      child: Icon(Icons.person, size: 28),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Doctor Status',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 8),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: doctorOnline
-                                ? const Color(0xFF2ECC71)
-                                : const Color(0xFFE74C3C),
-                            shape: BoxShape.circle,
-                          ),
+                        Row(
+                          children: [
+                            const Text('Doctor Status',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 8),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: doctorOnline
+                                    ? const Color(0xFF2ECC71)
+                                    : const Color(0xFFE74C3C),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          doctorOnline
+                              ? 'Doctors are available'
+                              : 'No doctors online',
+                          style: const TextStyle(
+                              color: Color(0xFF7F8C8D), fontSize: 12),
+                        )
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Green = online, Red = offline',
-                      style: TextStyle(color: Color(0xFF7F8C8D), fontSize: 12),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () {
+                        setState(() {});
+                      },
+                      tooltip: 'Refresh status',
                     )
                   ],
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.sync),
-                  onPressed: () {
-                    final next = !doctorOnline;
-                    MockBackendService.instance.setDoctorOnline(next);
-                    setState(() => doctorOnline = next);
-                  },
-                  tooltip: 'Toggle status (demo)',
-                )
-              ],
+                );
+              },
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
