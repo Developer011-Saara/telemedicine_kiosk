@@ -8,8 +8,9 @@ A comprehensive Flutter-based telemedicine kiosk application designed for health
 - **Splash Screen** - Animated loading with fade transition to login
 - **Secure Authentication** - Static login with credentials validation
 - **Kiosk Mode** - Native Android lock task mode for dedicated kiosk use
-- **Real-time Status** - Live doctor availability monitoring
-- **Appointment Booking** - Complete booking flow with confirmation
+- **Real-time Status** - Live doctor availability monitoring via Firebase Firestore
+- **Smart Appointment Booking** - Complete booking flow with doctor selection
+- **Firebase Integration** - Real-time data synchronization and updates
 - **Auto-launch** - Boots automatically after device restart
 
 ### User Interface
@@ -32,31 +33,42 @@ A comprehensive Flutter-based telemedicine kiosk application designed for health
 - Demo credentials displayed on screen
 
 ### 3. Home Dashboard
-- Doctor status indicator (green/red dot)
+- **Real-time Doctor Status** - Live status indicator (green/red dot) from Firebase
+- **Dynamic Status Updates** - Automatically updates when doctors come online/offline
 - Two main action buttons:
-  - **Book Appointment** - Navigate to booking form
-  - **Doctor Status** - View healthcare team availability
-- Real-time status toggle functionality
+  - **Book Appointment** - Navigate to smart booking form with doctor selection
+  - **Doctor Status** - View complete healthcare team availability
+- **Refresh Functionality** - Manual refresh button for status updates
 
-### 4. Appointment Booking
+### 4. Smart Appointment Booking
 - **Form Fields**:
   - Name (pre-filled as "Guest")
   - Appointment type dropdown (General, Follow-up, Prescription)
+  - **Doctor Selection** - Real-time dropdown showing only online doctors
   - Preferred date/time picker
+- **Doctor Selection Features**:
+  - Shows doctor name and specialty
+  - Only displays doctors currently online
+  - Real-time updates when doctor status changes
+  - Form validation requires doctor selection
 - **Confirmation**:
   - Haptic feedback on booking
-  - Animated confirmation dialog
+  - Animated confirmation dialog with selected doctor
   - Success animation with checkmark
 
-### 5. Doctor Status Screen
-- **Healthcare Team View**:
-  - Dr. Sarah Johnson (Cardiologist) - Available Now
-  - Dr. Michael Chen (General Practitioner) - In consultation
-  - Dr. Emily Rodriguez (Pediatrician) - Offline
+### 5. Real-time Doctor Status Screen
+- **Live Healthcare Team View**:
+  - Real-time data from Firebase Firestore
+  - Dynamic doctor availability updates
+  - Professional doctor cards with status indicators
 - **Visual Indicators**:
   - Green highlight for available doctors
   - Status dots and response times
   - Offline warning notifications
+- **Real-time Features**:
+  - Automatic updates when doctor status changes
+  - Loading states and error handling
+  - Retry functionality for connection issues
 
 ## 🛠 Technical Architecture
 
@@ -70,8 +82,7 @@ lib/
 ├── booking_screen.dart      # Appointment booking form
 ├── status_screen.dart       # Doctor availability view
 └── services/
-    ├── native_bridge.dart   # Android kiosk mode integration
-    └── mock_backend.dart    # Backend service simulation
+    └── native_bridge.dart   # Android kiosk mode integration
 ```
 
 ### Android Integration
@@ -83,6 +94,8 @@ lib/
 ### Dependencies
 - `flutter` - Core framework
 - `cupertino_icons` - iOS-style icons
+- `firebase_core` - Firebase core functionality
+- `cloud_firestore` - Real-time database integration
 - `google_fonts` - Typography (commented out for compatibility)
 
 ## 🔧 Setup & Installation
@@ -91,6 +104,7 @@ lib/
 - Flutter SDK (3.5.4+)
 - Android Studio
 - Android device/emulator
+- Firebase project with Firestore enabled
 
 ### Installation Steps
 1. **Clone the repository**
@@ -104,7 +118,13 @@ lib/
    flutter pub get
    ```
 
-3. **Run the application**
+3. **Configure Firebase**
+   - Set up Firebase project
+   - Enable Firestore database
+   - Add `google-services.json` to `android/app/`
+   - Add sample doctor data (see `FIRESTORE_SETUP.md`)
+
+4. **Run the application**
    ```bash
    flutter run
    ```
@@ -138,26 +158,54 @@ lib/
 - **Body**: Regular, 14-16px
 - **Captions**: Light, 12px
 
+## 🔥 Firebase Integration
+
+### Current Implementation
+- ✅ **Real-time Doctor Status** - Live updates from Firestore
+- ✅ **Smart Doctor Selection** - Only shows online doctors in booking
+- ✅ **Dynamic Status Updates** - Automatic UI updates when data changes
+- ✅ **Error Handling** - Graceful handling of connection issues
+- ✅ **Loading States** - Proper loading indicators and retry functionality
+
+### Data Structure
+- **Collection**: `doctors`
+- **Fields**: `name`, `specialty`, `isOnline`, `status`, `responseTime`
+- **Real-time**: StreamBuilder for live updates
+- **Filtering**: Only online doctors shown in booking
+
 ## 🔄 Future Enhancements
 
 ### Planned Features
-- **Firebase Integration** - Real-time doctor status updates
 - **User Management** - Patient profiles and history
 - **Video Consultation** - Direct doctor-patient calls
 - **Prescription Management** - Digital prescription handling
 - **Multi-language Support** - Internationalization
+- **Push Notifications** - Appointment reminders and updates
 
-### Backend Integration
-- Replace mock backend with Firebase Firestore
-- Real-time status updates via WebSocket
+### Advanced Backend Integration
 - User authentication with Firebase Auth
 - Appointment scheduling with Cloud Functions
+- Real-time chat integration
+- File upload for medical documents
 
 ## 🐛 Known Issues
 
-- Firebase integration temporarily disabled due to JDK compatibility
-- Some layout overflow warnings on smaller screens
-- Mock backend for demonstration purposes
+- Java version warnings (non-critical, safe to ignore)
+- Some Android system warnings (harmless, related to device compatibility)
+- Appointment persistence uses local storage (Firebase integration for doctor data only)
+
+## 📚 Documentation
+
+### Firebase Setup
+- **FIRESTORE_SETUP.md** - Complete Firebase configuration guide
+- **VERIFICATION_CHECKLIST.md** - Step-by-step testing checklist
+- **Sample Data** - Pre-configured doctor data structure
+
+### Quick Start
+1. Follow the Firebase setup guide
+2. Add sample doctor data to Firestore
+3. Test real-time functionality
+4. Customize doctor information
 
 ## 📄 License
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'services/mock_backend.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -24,6 +23,30 @@ class _BookingScreenState extends State<BookingScreen>
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveBookingLocally({
+    required String name,
+    required String type,
+    required String doctorId,
+    required String doctorName,
+    required DateTime at,
+  }) async {
+    // Simulate latency
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+
+    // Log booking details (could be extended to save to Firebase or local storage)
+    print('Booking saved: $name - $type - $doctorName - ${at.toString()}');
+
+    // TODO: Implement Firebase booking collection
+    // await FirebaseFirestore.instance.collection('appointments').add({
+    //   'name': name,
+    //   'type': type,
+    //   'doctorId': doctorId,
+    //   'doctorName': doctorName,
+    //   'appointmentTime': at,
+    //   'createdAt': FieldValue.serverTimestamp(),
+    // });
   }
 
   Future<void> _pickDateTime() async {
@@ -60,9 +83,12 @@ class _BookingScreenState extends State<BookingScreen>
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
 
-    await MockBackendService.instance.saveBooking(
+    // Save booking locally (could be extended to save to Firebase)
+    await _saveBookingLocally(
       name: _nameController.text.trim(),
       type: _appointmentType,
+      doctorId: _selectedDoctorId ?? 'Unknown',
+      doctorName: _selectedDoctorName ?? 'Unknown Doctor',
       at: _preferredDateTime,
     );
     if (!mounted) return;
