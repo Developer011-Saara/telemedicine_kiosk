@@ -257,7 +257,7 @@ If you see "PERMISSION_DENIED" errors in logs:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is available for educational and demonstration purposes.
 
 ## Contributing
 
