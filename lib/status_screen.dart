@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'services/action_logger.dart';
 
 class StatusScreen extends StatefulWidget {
   const StatusScreen({super.key});
@@ -12,6 +13,8 @@ class _StatusScreenState extends State<StatusScreen> {
   @override
   void initState() {
     super.initState();
+    // Log doctor status check when screen loads
+    ActionLogger().logDoctorStatusCheck();
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'services/action_logger.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -34,6 +35,15 @@ class _BookingScreenState extends State<BookingScreen>
   }) async {
     // Simulate latency
     await Future<void>.delayed(const Duration(milliseconds: 500));
+
+    // Log booking action to Firestore
+    await ActionLogger().logAppointmentBooking(
+      patientName: name,
+      appointmentType: type,
+      doctorId: doctorId,
+      doctorName: doctorName,
+      appointmentTime: at,
+    );
 
     // Log booking details (could be extended to save to Firebase or local storage)
     print('Booking saved: $name - $type - $doctorName - ${at.toString()}');
@@ -235,7 +245,10 @@ class _BookingScreenState extends State<BookingScreen>
                           }
 
                           return DropdownButtonFormField<String>(
-                            value: _selectedDoctorId,
+                            value: onlineDoctors
+                                    .any((doc) => doc.id == _selectedDoctorId)
+                                ? _selectedDoctorId
+                                : null,
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Select Doctor',
@@ -277,17 +290,23 @@ class _BookingScreenState extends State<BookingScreen>
                                 ),
                               );
                             }).toList(),
-                            onChanged: (doctorId) {
+                            onChanged: (doctorId) async {
                               if (doctorId != null) {
                                 final doctorDoc = onlineDoctors.firstWhere(
                                   (doc) => doc.id == doctorId,
                                 );
                                 final data =
                                     doctorDoc.data() as Map<String, dynamic>;
+                                final doctorName =
+                                    data['name'] ?? 'Unknown Doctor';
+
+                                // Log doctor selection
+                                await ActionLogger()
+                                    .logDoctorSelection(doctorId, doctorName);
+
                                 setState(() {
                                   _selectedDoctorId = doctorId;
-                                  _selectedDoctorName =
-                                      data['name'] ?? 'Unknown Doctor';
+                                  _selectedDoctorName = doctorName;
                                 });
                               }
                             },

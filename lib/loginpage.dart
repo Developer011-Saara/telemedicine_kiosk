@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/action_logger.dart';
 
 class LoginpageWidget extends StatefulWidget {
   const LoginpageWidget({super.key});
@@ -204,15 +205,29 @@ class _LoginpageWidgetState extends State<LoginpageWidget> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 final enteredUser =
                                     _usernameController.text.trim();
                                 final enteredPass = _passwordController.text;
                                 if (enteredUser == _validUsername &&
                                     enteredPass == _validPassword) {
+                                  // Log successful login
+                                  await ActionLogger().logLogin(enteredUser);
                                   Navigator.of(context)
                                       .pushReplacementNamed('/home');
                                 } else {
+                                  // Log failed login attempt
+                                  await ActionLogger().logError(
+                                    'login_failed',
+                                    'Invalid credentials',
+                                    context: {
+                                      'username': enteredUser,
+                                      'attemptedPassword':
+                                          enteredPass.isNotEmpty
+                                              ? '***'
+                                              : 'empty',
+                                    },
+                                  );
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content:

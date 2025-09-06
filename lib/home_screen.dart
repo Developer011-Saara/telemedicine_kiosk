@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'services/action_logger.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,7 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
+                await ActionLogger().logNavigation('booking_screen');
                 Navigator.of(context).pushNamed('/booking');
               },
               icon: const Icon(Icons.calendar_month, size: 28),
@@ -99,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
+                await ActionLogger().logNavigation('status_screen');
                 Navigator.of(context).pushNamed('/status');
               },
               icon: const Icon(Icons.medical_information, size: 28),
