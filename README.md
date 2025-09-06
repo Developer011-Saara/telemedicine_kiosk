@@ -2,6 +2,15 @@
 
 A comprehensive Flutter-based telemedicine kiosk application designed for healthcare facilities. The app provides a complete patient journey from splash screen to appointment booking with real-time doctor status monitoring.
 
+## Demo Credentials
+
+For testing and demonstration purposes, use these credentials to access the app:
+
+- **Username**: `Telemed`
+- **Password**: `Telemed@1234`
+
+> **Note**: These credentials are displayed on the login screen for easy reference during testing.
+
 ## Features
 
 ### Core Functionality

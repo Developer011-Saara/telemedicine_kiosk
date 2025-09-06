@@ -122,68 +122,130 @@ class _BookingScreenState extends State<BookingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isTablet = screenWidth > 600;
+    final isKiosk = screenWidth > 1024;
+
+    // Responsive dimensions
+    final maxWidth = isKiosk ? 800.0 : (isTablet ? 600.0 : 520.0);
+    final horizontalPadding = screenWidth * 0.05;
+    final verticalPadding = screenHeight * 0.02;
+    final cardPadding = isKiosk ? 24.0 : (isTablet ? 20.0 : 16.0);
+    final borderRadius = isKiosk ? 16.0 : 12.0;
+    final titleFontSize = isKiosk ? 24.0 : (isTablet ? 20.0 : 18.0);
+    final buttonHeight = isKiosk ? 64.0 : (isTablet ? 60.0 : 56.0);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Book Appointment')),
+      appBar: AppBar(
+        title: Text(
+          'Book Appointment',
+          style: TextStyle(fontSize: isKiosk ? 22.0 : 20.0),
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
+            constraints: BoxConstraints(maxWidth: maxWidth),
             child: Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(borderRadius),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(cardPadding),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
+                      Text(
                         'Appointment Details',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: screenHeight * 0.015),
                       TextFormField(
                         controller: _nameController,
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Name',
+                          labelStyle:
+                              TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(borderRadius)),
                           ),
-                          prefixIcon: Icon(Icons.person_outline),
+                          prefixIcon: Icon(
+                            Icons.person_outline,
+                            size: isKiosk ? 24.0 : 20.0,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: isKiosk ? 20.0 : 16.0,
+                            vertical: isKiosk ? 18.0 : 14.0,
+                          ),
                         ),
+                        style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                         validator: (val) => (val == null || val.trim().isEmpty)
                             ? 'Please enter a name'
                             : null,
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: screenHeight * 0.015),
                       DropdownButtonFormField<String>(
                         value: _appointmentType,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Appointment Type',
+                          labelStyle:
+                              TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(borderRadius)),
                           ),
-                          prefixIcon: Icon(Icons.category_outlined),
+                          prefixIcon: Icon(
+                            Icons.category_outlined,
+                            size: isKiosk ? 24.0 : 20.0,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: isKiosk ? 20.0 : 16.0,
+                            vertical: isKiosk ? 18.0 : 14.0,
+                          ),
                         ),
-                        items: const [
+                        style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                        items: [
                           DropdownMenuItem(
-                              value: 'General', child: Text('General')),
+                            value: 'General',
+                            child: Text(
+                              'General',
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                            ),
+                          ),
                           DropdownMenuItem(
-                              value: 'Follow-up', child: Text('Follow-up')),
+                            value: 'Follow-up',
+                            child: Text(
+                              'Follow-up',
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                            ),
+                          ),
                           DropdownMenuItem(
-                              value: 'Prescription',
-                              child: Text('Prescription')),
+                            value: 'Prescription',
+                            child: Text(
+                              'Prescription',
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                            ),
+                          ),
                         ],
                         onChanged: (val) =>
                             setState(() => _appointmentType = val ?? 'General'),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: screenHeight * 0.015),
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('doctors')
@@ -193,34 +255,60 @@ class _BookingScreenState extends State<BookingScreen>
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Select Doctor',
+                                labelStyle:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                                 border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(borderRadius)),
                                 ),
-                                prefixIcon:
-                                    Icon(Icons.medical_services_outlined),
+                                prefixIcon: Icon(
+                                  Icons.medical_services_outlined,
+                                  size: isKiosk ? 24.0 : 20.0,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: isKiosk ? 20.0 : 16.0,
+                                  vertical: isKiosk ? 18.0 : 14.0,
+                                ),
                               ),
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                               items: const [],
-                              hint: const Text('Loading doctors...'),
+                              hint: Text(
+                                'Loading doctors...',
+                                style:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                              ),
                               onChanged: (value) {},
                             );
                           }
 
                           if (snapshot.hasError) {
                             return DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Select Doctor',
+                                labelStyle:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                                 border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(borderRadius)),
                                 ),
-                                prefixIcon:
-                                    Icon(Icons.medical_services_outlined),
+                                prefixIcon: Icon(
+                                  Icons.medical_services_outlined,
+                                  size: isKiosk ? 24.0 : 20.0,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: isKiosk ? 20.0 : 16.0,
+                                  vertical: isKiosk ? 18.0 : 14.0,
+                                ),
                               ),
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                               items: const [],
-                              hint: const Text('Error loading doctors'),
+                              hint: Text(
+                                'Error loading doctors',
+                                style:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                              ),
                               onChanged: (value) {},
                             );
                           }
@@ -229,17 +317,30 @@ class _BookingScreenState extends State<BookingScreen>
 
                           if (onlineDoctors.isEmpty) {
                             return DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Select Doctor',
+                                labelStyle:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                                 border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(borderRadius)),
                                 ),
-                                prefixIcon:
-                                    Icon(Icons.medical_services_outlined),
+                                prefixIcon: Icon(
+                                  Icons.medical_services_outlined,
+                                  size: isKiosk ? 24.0 : 20.0,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: isKiosk ? 20.0 : 16.0,
+                                  vertical: isKiosk ? 18.0 : 14.0,
+                                ),
                               ),
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                               items: const [],
-                              hint: const Text('No doctors available'),
+                              hint: Text(
+                                'No doctors available',
+                                style:
+                                    TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                              ),
                               onChanged: (value) {},
                             );
                           }
@@ -250,14 +351,24 @@ class _BookingScreenState extends State<BookingScreen>
                                 ? _selectedDoctorId
                                 : null,
                             isExpanded: true,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Select Doctor',
+                              labelStyle:
+                                  TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                               border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(borderRadius)),
                               ),
-                              prefixIcon: Icon(Icons.medical_services_outlined),
+                              prefixIcon: Icon(
+                                Icons.medical_services_outlined,
+                                size: isKiosk ? 24.0 : 20.0,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: isKiosk ? 20.0 : 16.0,
+                                vertical: isKiosk ? 18.0 : 14.0,
+                              ),
                             ),
+                            style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
                             items: onlineDoctors.map((doc) {
                               final data = doc.data() as Map<String, dynamic>;
                               final doctorId = doc.id;
@@ -270,18 +381,18 @@ class _BookingScreenState extends State<BookingScreen>
                                 value: doctorId,
                                 child: Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.medical_services,
-                                      size: 18,
-                                      color: Color(0xFF2E7D8A),
+                                      size: isKiosk ? 22.0 : 18.0,
+                                      color: const Color(0xFF2E7D8A),
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: isKiosk ? 12.0 : 8.0),
                                     Expanded(
                                       child: Text(
                                         '$doctorName - $specialty',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w500,
-                                          fontSize: 14,
+                                          fontSize: isKiosk ? 18.0 : 14.0,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -319,27 +430,48 @@ class _BookingScreenState extends State<BookingScreen>
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: _pickDateTime,
-                        icon: const Icon(Icons.schedule),
-                        label: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            'Preferred Time: ${_preferredDateTime.toLocal().toString().substring(0, 16)}',
-                            style: const TextStyle(fontSize: 16),
+                      SizedBox(height: screenHeight * 0.015),
+                      SizedBox(
+                        height: buttonHeight,
+                        child: OutlinedButton.icon(
+                          onPressed: _pickDateTime,
+                          icon: Icon(
+                            Icons.schedule,
+                            size: isKiosk ? 28.0 : 24.0,
+                          ),
+                          label: Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: screenHeight * 0.015),
+                            child: Text(
+                              'Preferred Time: ${_preferredDateTime.toLocal().toString().substring(0, 16)}',
+                              style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: screenHeight * 0.02),
                       SizedBox(
-                        height: 56,
+                        height: buttonHeight,
                         child: ElevatedButton.icon(
                           onPressed: _confirmBooking,
-                          icon:
-                              const Icon(Icons.check_circle_outline, size: 26),
-                          label: const Text('Confirm Booking',
-                              style: TextStyle(fontSize: 18)),
+                          icon: Icon(
+                            Icons.check_circle_outline,
+                            size: isKiosk ? 30.0 : 26.0,
+                          ),
+                          label: Text(
+                            'Confirm Booking',
+                            style: TextStyle(fontSize: isKiosk ? 20.0 : 18.0),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -385,36 +517,65 @@ class _BookingConfirmationState extends State<_BookingConfirmation>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isTablet = screenWidth > 600;
+    final isKiosk = screenWidth > 1024;
+
+    final padding = isKiosk ? 32.0 : (isTablet ? 28.0 : 24.0);
+    final avatarRadius = isKiosk ? 48.0 : (isTablet ? 42.0 : 36.0);
+    final iconSize = isKiosk ? 48.0 : (isTablet ? 42.0 : 36.0);
+    final titleFontSize = isKiosk ? 24.0 : (isTablet ? 20.0 : 18.0);
+    final textFontSize = isKiosk ? 18.0 : (isTablet ? 16.0 : 14.0);
+    final buttonHeight = isKiosk ? 56.0 : (isTablet ? 52.0 : 48.0);
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(padding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ScaleTransition(
             scale:
                 CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-            child: const CircleAvatar(
-              radius: 36,
-              backgroundColor: Color(0xFF2ECC71),
-              child: Icon(Icons.check, color: Colors.white, size: 36),
+            child: CircleAvatar(
+              radius: avatarRadius,
+              backgroundColor: const Color(0xFF2ECC71),
+              child: Icon(Icons.check, color: Colors.white, size: iconSize),
             ),
           ),
-          const SizedBox(height: 12),
-          const Text('Booking Confirmed',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          SizedBox(height: screenHeight * 0.015),
+          Text(
+            'Booking Confirmed',
+            style: TextStyle(
+              fontSize: titleFontSize,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: screenHeight * 0.01),
           Text(
             '${widget.name} • ${widget.appointmentType}\nDoctor: ${widget.doctorName}\n${widget.dateTime.toLocal().toString().substring(0, 16)}',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF7F8C8D)),
+            style: TextStyle(
+              color: const Color(0xFF7F8C8D),
+              fontSize: textFontSize,
+            ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: screenHeight * 0.02),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: buttonHeight,
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Done'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(isKiosk ? 16.0 : 12.0),
+                ),
+              ),
+              child: Text(
+                'Done',
+                style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+              ),
             ),
           )
         ],

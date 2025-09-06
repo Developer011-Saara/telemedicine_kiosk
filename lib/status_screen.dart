@@ -19,31 +19,55 @@ class _StatusScreenState extends State<StatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isTablet = screenWidth > 600;
+    final isKiosk = screenWidth > 1024;
+
+    // Responsive dimensions
+    final horizontalPadding = screenWidth * 0.05;
+    final verticalPadding = screenHeight * 0.02;
+    final titleFontSize = isKiosk ? 32.0 : (isTablet ? 28.0 : 24.0);
+    final iconSize = isKiosk ? 28.0 : (isTablet ? 24.0 : 20.0);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Healthcare Team'),
+        title: Text(
+          'Healthcare Team',
+          style: TextStyle(fontSize: isKiosk ? 22.0 : 20.0),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: Icon(
+              Icons.notifications_outlined,
+              size: isKiosk ? 28.0 : 24.0,
+            ),
             onPressed: () {},
           ),
         ],
       ),
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
             child: Row(
               children: [
                 Text(
                   'Doctor Availability',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: titleFontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 8),
-                Icon(Icons.notifications_active_outlined, size: 20),
+                SizedBox(width: screenWidth * 0.02),
+                Icon(
+                  Icons.notifications_active_outlined,
+                  size: iconSize,
+                ),
               ],
             ),
           ),
@@ -59,9 +83,21 @@ class _StatusScreenState extends State<StatusScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('doctors').snapshots(),
       builder: (context, snapshot) {
+        final screenSize = MediaQuery.of(context).size;
+        final screenWidth = screenSize.width;
+        final screenHeight = screenSize.height;
+        final isTablet = screenWidth > 600;
+        final isKiosk = screenWidth > 1024;
+
+        final iconSize = isKiosk ? 80.0 : (isTablet ? 72.0 : 64.0);
+        final fontSize = isKiosk ? 20.0 : (isTablet ? 18.0 : 16.0);
+        final buttonHeight = isKiosk ? 56.0 : (isTablet ? 52.0 : 48.0);
+
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: isKiosk ? 4.0 : 3.0,
+            ),
           );
         }
 
@@ -70,23 +106,38 @@ class _StatusScreenState extends State<StatusScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
-                  size: 64,
+                  size: iconSize,
                   color: Colors.red,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading doctors: ${snapshot.error}',
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
+                SizedBox(height: screenHeight * 0.02),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                  child: Text(
+                    'Error loading doctors: ${snapshot.error}',
+                    style: TextStyle(fontSize: fontSize),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {});
-                  },
-                  child: const Text('Retry'),
+                SizedBox(height: screenHeight * 0.02),
+                SizedBox(
+                  height: buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {});
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(isKiosk ? 16.0 : 12.0),
+                      ),
+                    ),
+                    child: Text(
+                      'Retry',
+                      style: TextStyle(fontSize: isKiosk ? 18.0 : 16.0),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -94,19 +145,26 @@ class _StatusScreenState extends State<StatusScreen> {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.medical_services_outlined,
-                  size: 64,
+                  size: iconSize,
                   color: Colors.grey,
                 ),
-                SizedBox(height: 16),
-                Text(
-                  'No doctors available at the moment',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                SizedBox(height: screenHeight * 0.02),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                  child: Text(
+                    'No doctors available at the moment',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -124,7 +182,7 @@ class _StatusScreenState extends State<StatusScreen> {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                 itemCount: doctors.length,
                 itemBuilder: (context, index) {
                   final doctor = doctors[index];
@@ -134,18 +192,19 @@ class _StatusScreenState extends State<StatusScreen> {
             ),
             if (hasOfflineDoctors)
               Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(12),
+                margin: EdgeInsets.all(screenWidth * 0.05),
+                padding:
+                    EdgeInsets.all(isKiosk ? 16.0 : (isTablet ? 14.0 : 12.0)),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFF6E6),
                   border: Border.all(color: const Color(0xFFFFB74D)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(isKiosk ? 12.0 : 8.0),
                 ),
-                child: const Text(
+                child: Text(
                   'Some doctors are currently offline. Don\'t worry! They\'ll be back online shortly.',
                   style: TextStyle(
-                    color: Color(0xFF805A00),
-                    fontSize: 14,
+                    color: const Color(0xFF805A00),
+                    fontSize: isKiosk ? 16.0 : (isTablet ? 15.0 : 14.0),
                   ),
                 ),
               ),
@@ -196,6 +255,12 @@ class _DoctorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isTablet = screenWidth > 600;
+    final isKiosk = screenWidth > 1024;
+
     final Color cardColor =
         doctor.isAvailable ? const Color(0xFFE8F5E8) : Colors.white;
     final Color borderColor =
@@ -203,76 +268,85 @@ class _DoctorCard extends StatelessWidget {
     final Color statusColor =
         doctor.isAvailable ? const Color(0xFF4CAF50) : const Color(0xFF757575);
 
+    final avatarRadius = isKiosk ? 40.0 : (isTablet ? 35.0 : 30.0);
+    final cardPadding = isKiosk ? 20.0 : (isTablet ? 18.0 : 16.0);
+    final borderRadius = isKiosk ? 16.0 : 12.0;
+    final nameFontSize = isKiosk ? 20.0 : (isTablet ? 18.0 : 16.0);
+    final specialtyFontSize = isKiosk ? 18.0 : (isTablet ? 16.0 : 14.0);
+    final statusFontSize = isKiosk ? 18.0 : (isTablet ? 16.0 : 14.0);
+    final responseFontSize = isKiosk ? 16.0 : (isTablet ? 14.0 : 12.0);
+    final statusDotSize = isKiosk ? 10.0 : 8.0;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: cardColor,
         border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 30,
+            radius: avatarRadius,
             backgroundColor: const Color(0xFF2E7D8A),
             child: Text(
               doctor.name.split(' ').map((n) => n[0]).join(),
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: isKiosk ? 20.0 : (isTablet ? 18.0 : 16.0),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: screenWidth * 0.04),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   doctor.name,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: nameFontSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: screenHeight * 0.005),
                 Text(
                   doctor.specialty,
-                  style: const TextStyle(
-                    color: Color(0xFF757575),
-                    fontSize: 14,
+                  style: TextStyle(
+                    color: const Color(0xFF757575),
+                    fontSize: specialtyFontSize,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: screenHeight * 0.01),
                 Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: statusDotSize,
+                      height: statusDotSize,
                       decoration: BoxDecoration(
                         color: statusColor,
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: screenWidth * 0.015),
                     Text(
                       doctor.status,
                       style: TextStyle(
                         color: statusColor,
-                        fontSize: 14,
+                        fontSize: statusFontSize,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: screenHeight * 0.005),
                 Text(
                   doctor.responseTime,
-                  style: const TextStyle(
-                    color: Color(0xFF757575),
-                    fontSize: 12,
+                  style: TextStyle(
+                    color: const Color(0xFF757575),
+                    fontSize: responseFontSize,
                   ),
                 ),
               ],
