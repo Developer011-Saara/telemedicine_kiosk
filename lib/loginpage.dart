@@ -213,8 +213,10 @@ class _LoginpageWidgetState extends State<LoginpageWidget> {
                                     enteredPass == _validPassword) {
                                   // Log successful login
                                   await ActionLogger().logLogin(enteredUser);
+                                  if (mounted) {
                                   Navigator.of(context)
                                       .pushReplacementNamed('/home');
+                                  }
                                 } else {
                                   // Log failed login attempt
                                   await ActionLogger().logError(

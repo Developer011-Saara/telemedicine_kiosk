@@ -2,7 +2,7 @@
 
 A comprehensive Flutter-based telemedicine kiosk application designed for healthcare facilities. The app provides a complete patient journey from splash screen to appointment booking with real-time doctor status monitoring.
 
-## 🏥 Features
+## Features
 
 ### Core Functionality
 - **Splash Screen** - Animated loading with fade transition to login
@@ -11,6 +11,7 @@ A comprehensive Flutter-based telemedicine kiosk application designed for health
 - **Real-time Status** - Live doctor availability monitoring via Firebase Firestore
 - **Smart Appointment Booking** - Complete booking flow with doctor selection
 - **Firebase Integration** - Real-time data synchronization and updates
+- **Action Logging** - Comprehensive user interaction tracking and analytics
 - **Auto-launch** - Boots automatically after device restart
 
 ### User Interface
@@ -19,7 +20,7 @@ A comprehensive Flutter-based telemedicine kiosk application designed for health
 - **Responsive Layout** - Adapts to different screen sizes
 - **Accessibility** - Clear typography and intuitive flow
 
-## 🚀 App Flow
+## App Flow
 
 ### 1. Splash Screen
 - Displays kiosk branding image
@@ -70,7 +71,7 @@ A comprehensive Flutter-based telemedicine kiosk application designed for health
   - Loading states and error handling
   - Retry functionality for connection issues
 
-## 🛠 Technical Architecture
+## Technical Architecture
 
 ### Flutter Structure
 ```
@@ -82,7 +83,8 @@ lib/
 ├── booking_screen.dart      # Appointment booking form
 ├── status_screen.dart       # Doctor availability view
 └── services/
-    └── native_bridge.dart   # Android kiosk mode integration
+    ├── native_bridge.dart   # Android kiosk mode integration
+    └── action_logger.dart   # Firebase logging service
 ```
 
 ### Android Integration
@@ -98,7 +100,7 @@ lib/
 - `cloud_firestore` - Real-time database integration
 - `google_fonts` - Typography (commented out for compatibility)
 
-## 🔧 Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 - Flutter SDK (3.5.4+)
@@ -122,6 +124,7 @@ lib/
    - Set up Firebase project
    - Enable Firestore database
    - Add `google-services.json` to `android/app/`
+   - Deploy Firestore security rules (`firestore.rules`)
    - Add sample doctor data (see `FIRESTORE_SETUP.md`)
 
 4. **Run the application**
@@ -134,7 +137,7 @@ lib/
 - **Kotlin Version**: 2.1.0
 - **Gradle**: 8.1.0
 
-## 📱 Kiosk Mode Setup
+## Kiosk Mode Setup
 
 ### For Production Deployment
 1. **Set as Device Owner** (required for full kiosk mode)
@@ -145,7 +148,7 @@ lib/
 - App automatically enables kiosk mode on startup
 - Use device back button to exit (if not in full kiosk mode)
 
-## 🎨 Design System
+## Design System
 
 ### Color Palette
 - **Primary**: `#2E7D8A` (Medical teal)
@@ -158,7 +161,7 @@ lib/
 - **Body**: Regular, 14-16px
 - **Captions**: Light, 12px
 
-## 🔥 Firebase Integration
+## Firebase Integration
 
 ### Current Implementation
 - ✅ **Real-time Doctor Status** - Live updates from Firestore
@@ -173,7 +176,14 @@ lib/
 - **Real-time**: StreamBuilder for live updates
 - **Filtering**: Only online doctors shown in booking
 
-## 🔄 Future Enhancements
+### Action Logging System
+- **Collection**: `logs`
+- **Tracked Actions**: User logins, navigation, appointments, doctor selections, errors
+- **Analytics**: Complete user interaction tracking for insights
+- **Privacy**: No sensitive data logged, secure timestamp tracking
+- **Fallback**: Console logging if Firestore unavailable
+
+## Future Enhancements
 
 ### Planned Features
 - **User Management** - Patient profiles and history
@@ -188,30 +198,59 @@ lib/
 - Real-time chat integration
 - File upload for medical documents
 
-## 🐛 Known Issues
+## Recent Updates
+
+### v2.0 - Action Logging & Analytics
+- ✅ **Comprehensive Logging System** - Track all user interactions
+- ✅ **Firebase Analytics Integration** - Real-time usage monitoring
+- ✅ **Error Tracking** - Automatic error logging and reporting
+- ✅ **Security Rules** - Proper Firestore permissions configuration
+- ✅ **Navigation Safety** - Fixed null check operator errors
+
+### v1.5 - Firebase Integration
+- ✅ **Real-time Doctor Status** - Live Firestore integration
+- ✅ **Smart Doctor Selection** - Dynamic dropdown with online doctors
+- ✅ **Mock Data Removal** - Clean codebase without hardcoded data
+
+## Known Issues
 
 - Java version warnings (non-critical, safe to ignore)
 - Some Android system warnings (harmless, related to device compatibility)
 - Appointment persistence uses local storage (Firebase integration for doctor data only)
 
-## 📚 Documentation
+## Documentation
 
 ### Firebase Setup
 - **FIRESTORE_SETUP.md** - Complete Firebase configuration guide
 - **VERIFICATION_CHECKLIST.md** - Step-by-step testing checklist
+- **ACTION_LOGGING.md** - Comprehensive logging system documentation
+- **firestore.rules** - Security rules for Firestore collections
 - **Sample Data** - Pre-configured doctor data structure
 
 ### Quick Start
 1. Follow the Firebase setup guide
-2. Add sample doctor data to Firestore
-3. Test real-time functionality
-4. Customize doctor information
+2. Deploy Firestore security rules
+3. Add sample doctor data to Firestore
+4. Test real-time functionality and logging
+5. Customize doctor information
 
-## 📄 License
+### Troubleshooting
+
+#### Firestore Permission Denied
+If you see "PERMISSION_DENIED" errors in logs:
+1. Go to Firebase Console → Firestore Database → Rules
+2. Deploy the provided `firestore.rules` file
+3. Ensure rules allow read/write access to `logs` collection
+
+#### Navigation Errors
+- Fixed null check operator errors in navigation
+- App now safely handles context disposal during async operations
+
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -219,11 +258,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 4. Push to the branch
 5. Create a Pull Request
 
-## 📞 Support
+## Support
 
 For technical support or questions:
 - Create an issue in the repository
-- Contact the development team
+- Contact manishpatil0311@gmail.com
 - Check the documentation for troubleshooting
 
 ---

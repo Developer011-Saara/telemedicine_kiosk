@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to doctors collection
+    match /doctors/{document} {
+      allow read: if true;
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+    
+    // Allow read/write access to logs collection for analytics
+    match /logs/{document} {
+      allow read, write: if true; // Open for kiosk logging
+    }
+    
+    // Allow read/write access to appointments collection (future use)
+    match /appointments/{document} {
+      allow read, write: if true; // Open for kiosk appointments
+    }
+  }
+}
