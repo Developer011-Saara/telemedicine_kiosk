@@ -210,6 +210,7 @@ class _BookingScreenState extends State<BookingScreen>
 
                           return DropdownButtonFormField<String>(
                             value: _selectedDoctorId,
+                            isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Select Doctor',
                               border: OutlineInputBorder(
@@ -228,22 +229,22 @@ class _BookingScreenState extends State<BookingScreen>
 
                               return DropdownMenuItem<String>(
                                 value: doctorId,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
+                                child: Row(
                                   children: [
-                                    Text(
-                                      doctorName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                      ),
+                                    const Icon(
+                                      Icons.medical_services,
+                                      size: 18,
+                                      color: Color(0xFF2E7D8A),
                                     ),
-                                    Text(
-                                      specialty,
-                                      style: const TextStyle(
-                                        color: Color(0xFF757575),
-                                        fontSize: 14,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '$doctorName - $specialty',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
