@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'services/mock_backend.dart';
 
 class BookingScreen extends StatefulWidget {
@@ -15,6 +16,8 @@ class _BookingScreenState extends State<BookingScreen>
   final TextEditingController _nameController =
       TextEditingController(text: 'Guest');
   String _appointmentType = 'General';
+  String? _selectedDoctorId;
+  String? _selectedDoctorName;
   DateTime _preferredDateTime = DateTime.now().add(const Duration(minutes: 30));
 
   @override
@@ -74,6 +77,7 @@ class _BookingScreenState extends State<BookingScreen>
         return _BookingConfirmation(
           name: _nameController.text.trim(),
           appointmentType: _appointmentType,
+          doctorName: _selectedDoctorName ?? 'Not selected',
           dateTime: _preferredDateTime,
         );
       },
@@ -144,6 +148,132 @@ class _BookingScreenState extends State<BookingScreen>
                             setState(() => _appointmentType = val ?? 'General'),
                       ),
                       const SizedBox(height: 12),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('doctors')
+                            .where('isOnline', isEqualTo: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: 'Select Doctor',
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                ),
+                                prefixIcon:
+                                    Icon(Icons.medical_services_outlined),
+                              ),
+                              items: const [],
+                              hint: const Text('Loading doctors...'),
+                              onChanged: (value) {},
+                            );
+                          }
+
+                          if (snapshot.hasError) {
+                            return DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: 'Select Doctor',
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                ),
+                                prefixIcon:
+                                    Icon(Icons.medical_services_outlined),
+                              ),
+                              items: const [],
+                              hint: const Text('Error loading doctors'),
+                              onChanged: (value) {},
+                            );
+                          }
+
+                          final onlineDoctors = snapshot.data?.docs ?? [];
+
+                          if (onlineDoctors.isEmpty) {
+                            return DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: 'Select Doctor',
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                ),
+                                prefixIcon:
+                                    Icon(Icons.medical_services_outlined),
+                              ),
+                              items: const [],
+                              hint: const Text('No doctors available'),
+                              onChanged: (value) {},
+                            );
+                          }
+
+                          return DropdownButtonFormField<String>(
+                            value: _selectedDoctorId,
+                            decoration: const InputDecoration(
+                              labelText: 'Select Doctor',
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                              ),
+                              prefixIcon: Icon(Icons.medical_services_outlined),
+                            ),
+                            items: onlineDoctors.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              final doctorId = doc.id;
+                              final doctorName =
+                                  data['name'] ?? 'Unknown Doctor';
+                              final specialty =
+                                  data['specialty'] ?? 'General Practitioner';
+
+                              return DropdownMenuItem<String>(
+                                value: doctorId,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      doctorName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      specialty,
+                                      style: const TextStyle(
+                                        color: Color(0xFF757575),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (doctorId) {
+                              if (doctorId != null) {
+                                final doctorDoc = onlineDoctors.firstWhere(
+                                  (doc) => doc.id == doctorId,
+                                );
+                                final data =
+                                    doctorDoc.data() as Map<String, dynamic>;
+                                setState(() {
+                                  _selectedDoctorId = doctorId;
+                                  _selectedDoctorName =
+                                      data['name'] ?? 'Unknown Doctor';
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a doctor';
+                              }
+                              return null;
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
                       OutlinedButton.icon(
                         onPressed: _pickDateTime,
                         icon: const Icon(Icons.schedule),
@@ -182,11 +312,13 @@ class _BookingConfirmation extends StatefulWidget {
   const _BookingConfirmation({
     required this.name,
     required this.appointmentType,
+    required this.doctorName,
     required this.dateTime,
   });
 
   final String name;
   final String appointmentType;
+  final String doctorName;
   final DateTime dateTime;
 
   @override
@@ -226,7 +358,7 @@ class _BookingConfirmationState extends State<_BookingConfirmation>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Text(
-            '${widget.name} • ${widget.appointmentType}\n${widget.dateTime.toLocal().toString().substring(0, 16)}',
+            '${widget.name} • ${widget.appointmentType}\nDoctor: ${widget.doctorName}\n${widget.dateTime.toLocal().toString().substring(0, 16)}',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Color(0xFF7F8C8D)),
           ),
